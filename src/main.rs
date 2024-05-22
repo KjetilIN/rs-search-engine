@@ -1,5 +1,5 @@
-use std::{collections::HashMap, fmt::Error, fs::{self, File}, io::{BufReader, Read}, process::exit};
-
+use std::{collections::HashMap, fs::{self, File}, io::{BufReader, Read}, process::exit};
+use std::error::Error;
 use regex::Regex;
 
 type TokenizedDocument = HashMap<String, usize>; 
@@ -7,11 +7,7 @@ type FolderTokens = HashMap<String, TokenizedDocument>;
 
 const FOLDER_PATH: &str = "./pages/";
 
-
-fn parse_file_html(file_path: &str) -> Result<TokenizedDocument, Error>{
-    // Create new map for the tokens
-    let mut map: TokenizedDocument = HashMap::new();
-
+fn read_file(file_path: &str) -> Result<String, Box<dyn Error>>{
     // Read the file 
     let file =  match File::open(file_path){
         Ok(file) => file,
@@ -29,30 +25,47 @@ fn parse_file_html(file_path: &str) -> Result<TokenizedDocument, Error>{
         panic!()
     });
 
+    // Ok
+    Ok(content)
+}
+
+
+fn parse_file_html(file_path: &str) -> Result<TokenizedDocument, Box<dyn Error>>{
+    // Create new map for the tokens
+    let mut map: TokenizedDocument = HashMap::new();
+
+    // Only allow html files to be parsed 
+    if !file_path.ends_with(".html"){
+        println!("[ERROR] Tried to parse the following file as HTML file: {file_path}");
+        return Err(Box::from("Parsing error"));
+    }
+
+    // Content of the file 
+    let content = read_file(file_path).expect("File not read while parsing html");
+
     // Iterate over each file 
     for line in content.lines(){
         let tag_regex: Regex = Regex::new(r"<[^>]*>").unwrap();
         let line_to_tokenize: String = tag_regex.replace_all(&line, "").into_owned();
         
-        let tokens: Vec<&str> = line_to_tokenize.split(" ")
-                                                .filter(|s| !s.trim().is_empty())
-                                                .collect();  
+        let tokens: Vec<&str> = line_to_tokenize.split_whitespace().collect();
 
-        if tokens.len() > 0{
-            println!("{:?}", tokens); 
+   
+        for token in tokens{
+            let counter = map.entry(token.to_ascii_lowercase()).or_insert(0);
+            *counter += 1;
         }
-        
     }
 
     Ok(map)
 }
 
 
-fn parse_file_md(file_path: &str) -> Result<Option<TokenizedDocument>, Error>{
+fn parse_file_md(file_path: &str) -> Result<Option<TokenizedDocument>, Box<dyn Error>>{
     unimplemented!("Parse Markdown File")
 }
 
-fn parse_dir(folder_path: &str) -> Result<FolderTokens, ()> {
+fn parse_dir(folder_path: &str, log_enabled: bool, exit_on_parse_error: bool) -> Result<FolderTokens, ()> {
     let mut folder_tokens = HashMap::new();
 
     let paths = fs::read_dir(folder_path).unwrap_or_else(|err| {
@@ -62,11 +75,39 @@ fn parse_dir(folder_path: &str) -> Result<FolderTokens, ()> {
 
     for path in paths{
         if let Some(current_path) = path.unwrap().path().to_str(){
-            println!("[INFO] Parsing file {}", current_path);
-            _ = parse_file_html(current_path);
+            // Log the current file 
+            if log_enabled{
+                println!("[INFO] Parsing file {}", current_path);
+            }
+                
+            let document_tokens: TokenizedDocument = match parse_file_html(current_path){
+                Ok(value) => value,
+                Err(_) =>{
+                    if log_enabled{
+                        println!("[ERROR] Could not parse file {}", current_path);
+                    }
+
+                    if exit_on_parse_error{
+                        exit(1)
+                    }
+
+                    return Ok(HashMap::new());
+                },
+            };
+
+            if document_tokens.is_empty(){
+                continue;
+            }else{
+                folder_tokens.insert(current_path.to_string(), document_tokens);
+            }
+
         }else{
-            eprintln!("[ERROR] File not available");
-            exit(1)
+            if log_enabled{
+                eprintln!("[ERROR] File not available");
+            }
+            if exit_on_parse_error{
+                exit(1)
+            }
         }
     }
     
@@ -75,6 +116,8 @@ fn parse_dir(folder_path: &str) -> Result<FolderTokens, ()> {
 
 fn main() {
     
-    _ = parse_dir(FOLDER_PATH);
+    let documents: FolderTokens = parse_dir(FOLDER_PATH, true, true).unwrap();
+
+    println!("FOLDER: {:?}", documents);
 
 }
