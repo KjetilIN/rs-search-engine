@@ -1,5 +1,7 @@
 use std::{collections::HashMap, fmt::Error, fs::{self, File}, io::{BufReader, Read}, process::exit};
 
+use regex::Regex;
+
 type TokenizedDocument = HashMap<String, usize>; 
 type FolderTokens = HashMap<String, TokenizedDocument>; 
 
@@ -29,35 +31,17 @@ fn parse_file_html(file_path: &str) -> Result<TokenizedDocument, Error>{
 
     // Iterate over each file 
     for line in content.lines(){
-        let mut line_to_tokenize: String = line.to_string();
-        let mut open_tag_index: i32 = -1; 
+        let tag_regex: Regex = Regex::new(r"<[^>]*>").unwrap();
+        let line_to_tokenize: String = tag_regex.replace_all(&line, "").into_owned();
+        
+        let tokens: Vec<&str> = line_to_tokenize.split(" ")
+                                                .filter(|s| !s.trim().is_empty())
+                                                .collect();  
 
-        // Iterate over each char in the line and 
-        for (index, char) in line.chars().enumerate(){
-            if char == '<'{
-                open_tag_index = index as i32;
-                continue;
-            }else if char == '>' {
-                if open_tag_index > -1 {
-                    // Tag can be removed, and reset start index
-                    line_to_tokenize.replace_range(open_tag_index as usize..index, "");
-                    open_tag_index = -1; 
-                }else{
-                    eprintln!("[ERROR] Found '>' without a opening tag in '{line}': {file_path}");
-                    exit(1)
-                }
-                
-            }
+        if tokens.len() > 0{
+            println!("{:?}", tokens); 
         }
-
-        // Check if there is an opening tag without closing tag
-        if open_tag_index != -1{
-            eprintln!("[ERROR] Found '<' without a closing tag in {file_path}");
-            exit(1)
-        }
-
-        // Collect tokens 
-        let tokens: Vec<&str> = line_to_tokenize.split(" ").into_iter().collect();   
+        
     }
 
     Ok(map)
