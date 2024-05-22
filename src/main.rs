@@ -114,6 +114,24 @@ fn parse_dir(folder_path: &str, log_enabled: bool, exit_on_parse_error: bool) ->
     Ok(folder_tokens)
 }
 
+fn count_words(document: &TokenizedDocument) -> usize{
+    let mut counter:usize = 0; 
+    for (_, value) in document.into_iter(){
+        counter += value;
+    }
+    counter
+}
+
+fn term_frequency(term: String, document: TokenizedDocument) -> f64{
+    if document.contains_key(&term){
+        let word_count = document.get(&term).unwrap();
+        let total_word_count = count_words(&document);
+        return (word_count / total_word_count) as f64; 
+    }else{
+        0.0
+    }
+}
+
 fn main() {
     
     let documents: FolderTokens = parse_dir(FOLDER_PATH, true, true).unwrap();
