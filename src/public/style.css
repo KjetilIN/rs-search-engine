@@ -56,3 +56,28 @@ h3 {
 #searchct button:hover {
     background-color: #0056b3;
 }
+
+#results ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#results li {
+    margin-bottom: 20px;
+}
+
+#results a {
+    text-decoration: none;
+    color: #1a0dab;
+    font-size: 18px;
+}
+
+#results a:hover {
+    text-decoration: underline;
+}
+
+#results .description {
+    color: #545454;
+    font-size: 14px;
+    margin-top: 5px;
+}
