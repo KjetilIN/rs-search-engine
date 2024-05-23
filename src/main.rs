@@ -1,4 +1,4 @@
-use types::{FolderTokens, TokenizedDocument};
+use types::FolderTokens;
 
 mod parse;
 pub mod types;
