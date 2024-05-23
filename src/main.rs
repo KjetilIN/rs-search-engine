@@ -1,11 +1,13 @@
 use std::process::exit;
+use tiny_http::{Method, Server};
 
-use tiny_http::Server;
-use types::FolderTokens;
+use crate::api::handle_get_request;
 
 mod parse;
 pub mod types;
 pub mod tf;
+pub mod api;
+pub mod file_operations;
 
 fn main() {
 
@@ -26,8 +28,17 @@ fn main() {
                 continue;
             } 
         }; 
+        println!("[INFO] URL {}", request.url()); 
 
-        println!("[INFO] URL {}", request.url());    
+        // Handle requests based on methods
+        match request.method() {
+            Method::Get => handle_get_request(request),
+            Method::Post => todo!(),
+            _ => todo!(),
+        }   
+
+
+
     }
 
     //let folder_path: &str = "./pages/";
