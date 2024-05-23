@@ -1,7 +1,7 @@
 use std::process::exit;
 use tiny_http::{Method, Server};
 
-use crate::api::{handle_bad_request, handle_get_request};
+use crate::api::{handle_bad_request, handle_get_request, handle_post_request};
 
 mod parse;
 pub mod types;
@@ -33,7 +33,7 @@ fn main() {
         // Handle requests based on methods
         match request.method() {
             Method::Get => handle_get_request(request),
-            Method::Post => todo!(),
+            Method::Post => handle_post_request(request),
             _ => handle_bad_request(request),
         }   
     }
