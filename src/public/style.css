@@ -1,0 +1,58 @@
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+}
+
+/* Title styles */
+h1 {
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+h3 {
+    color: #bbbbbb;
+    margin-bottom: 20px;
+}
+
+/* Search container styles */
+#searchct {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#searchct input[type="text"] {
+    padding: 10px;
+    width: 300px;
+    background-color: #333333;
+    border: 1px solid #555555;
+    border-radius: 5px 0 0 5px;
+    color: #e0e0e0;
+    outline: none;
+}
+
+#searchct input[type="text"]::placeholder {
+    color: #bbbbbb;
+}
+
+#searchct button {
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: #ffffff;
+    border: none;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+}
+
+#searchct button:hover {
+    background-color: #0056b3;
+}
