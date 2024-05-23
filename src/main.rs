@@ -1,7 +1,7 @@
 use std::process::exit;
 use tiny_http::{Method, Server};
 
-use crate::api::handle_get_request;
+use crate::api::{handle_bad_request, handle_get_request};
 
 mod parse;
 pub mod types;
@@ -34,11 +34,8 @@ fn main() {
         match request.method() {
             Method::Get => handle_get_request(request),
             Method::Post => todo!(),
-            _ => todo!(),
+            _ => handle_bad_request(request),
         }   
-
-
-
     }
 
     //let folder_path: &str = "./pages/";
