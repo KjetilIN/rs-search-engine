@@ -1,6 +1,7 @@
-use std::{collections::HashMap, fs::{self, File}, io::{BufReader, Read}, process::exit};
+use std::{collections::HashMap, fs::{self, read_dir, File}, io::{BufReader, Read}, process::exit};
 use std::error::Error;
 use regex::Regex;
+use walkdir::WalkDir;
 
 use crate::types::{FolderTokens, TokenizedDocument};
 
@@ -66,48 +67,48 @@ pub fn parse_file_md(file_path: &str) -> Result<Option<TokenizedDocument>, Box<d
 pub fn parse_dir(folder_path: &str, log_enabled: bool, exit_on_parse_error: bool) -> Result<FolderTokens, ()> {
     let mut folder_tokens = HashMap::new();
 
-    let paths = fs::read_dir(folder_path).unwrap_or_else(|err| {
-        eprintln!("[ERROR] Was not able to read dir path {folder_path}:{err}");
-        exit(1)
-    });
+    let walker = WalkDir::new(folder_path).into_iter();
 
-    for path in paths{
-        if let Some(current_path) = path.unwrap().path().to_str(){
-            // Log the current file 
-            if log_enabled{
-                println!("[INFO] Parsing file {}", current_path);
-            }
-                
-            let document_tokens: TokenizedDocument = match parse_file_html(current_path){
-                Ok(value) => value,
-                Err(_) =>{
-                    if log_enabled{
-                        println!("[ERROR] Could not parse file {}", current_path);
+    for entry in walker {
+        match entry {
+            Ok(entry) => {
+                let path = entry.path();
+                if path.is_file() {
+                    // Log the current file
+                    if log_enabled {
+                        println!("[INFO] Parsing file {}", path.display());
                     }
 
-                    if exit_on_parse_error{
-                        exit(1)
+                    let document_tokens: TokenizedDocument = match parse_file_html(path.to_str().unwrap()) {
+                        Ok(value) => value,
+                        Err(_) => {
+                            if log_enabled {
+                                println!("[ERROR] Could not parse file {}", path.display());
+                            }
+
+                            if exit_on_parse_error {
+                                exit(1);
+                            }
+
+                            return Err(());
+                        },
+                    };
+
+                    if !document_tokens.is_empty() {
+                        folder_tokens.insert(path.to_string_lossy().to_string(), document_tokens);
                     }
-
-                    return Ok(HashMap::new());
-                },
-            };
-
-            if document_tokens.is_empty(){
-                continue;
-            }else{
-                folder_tokens.insert(current_path.to_string(), document_tokens);
+                }
             }
-
-        }else{
-            if log_enabled{
-                eprintln!("[ERROR] File not available");
-            }
-            if exit_on_parse_error{
-                exit(1)
+            Err(err) => {
+                if log_enabled {
+                    eprintln!("[ERROR] Failed to read entry: {}", err);
+                }
+                if exit_on_parse_error {
+                    exit(1);
+                }
             }
         }
     }
-    
+
     Ok(folder_tokens)
 }
