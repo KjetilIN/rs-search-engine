@@ -29,8 +29,8 @@ pub fn handle_get_request(request: Request)-> (){
     match request.url(){
         // INDEX File
         "/" => serve_public_file("index.html", "text/html", request),
-        // Serving the styles request 
         "/style.css" => serve_public_file("style.css", "text/css", request),
+        "/script.js" => serve_public_file("script.js", "text/javascript", request),
         _ => handle_bad_request(request)
     }
 }
