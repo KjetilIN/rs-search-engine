@@ -1,7 +1,7 @@
 use std::{error::Error, fs::File, io::{BufReader, Read}};
 
 use crate::types::FolderTokens;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 const CACHE_FILE_PATH: &str = "./cache/";
 
 pub fn read_file(file_path: &str) -> Result<String, Box<dyn Error>>{
@@ -45,16 +45,17 @@ pub fn save_to_file<T: Serialize>(file_name:String, data:T) -> Result<(), Box<dy
     };
 }
 
-pub fn load_from_file() -> Result<FolderTokens, Box<dyn Error>>{
-    let file = match File::open(CACHE_FILE_PATH){
+pub fn load_from_file<T: for<'de> Deserialize<'de>>(file_name: String) -> Result<T, Box<dyn Error>> {
+    let path = format!("{}{}", CACHE_FILE_PATH, file_name);
+    let file = match File::open(&path) {
         Ok(f) => f,
         Err(err) => {
-            eprintln!("[ERROR] Could not create file: {err}");
+            eprintln!("[ERROR] Could not open file: {err}");
             return Err(Box::new(err));
         },
     };
 
-    let folder: FolderTokens = match bincode::deserialize_from(file) {
+    let data: T = match bincode::deserialize_from(file) {
         Ok(f) => f,
         Err(err) => {
             eprintln!("[ERROR] Could not read from file: {err}");
@@ -62,5 +63,5 @@ pub fn load_from_file() -> Result<FolderTokens, Box<dyn Error>>{
         },
     };
 
-    Ok(folder)
+    Ok(data)
 }

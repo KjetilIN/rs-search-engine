@@ -1,7 +1,7 @@
 use clap::{ Command, Subcommand};
 use std::{error::Error, process::exit};
 
-use crate::{api::serve_website, file_operations::save_to_file, types::FolderTokens};
+use crate::{api::serve_website, file_operations::{load_from_file, save_to_file}, types::{FolderTokens, PageInformationMap}};
 
 
 pub mod parse;
@@ -48,6 +48,9 @@ fn main() -> Result<(), Box<dyn Error>> {
                     Command::new("db")
                         .about("Save to database")
                 )
+        ).subcommand(
+            Command::new("load")
+                .about("Loads the saved .dat files for the search engine and prints them")
         )
         .get_matches();
 
@@ -80,6 +83,35 @@ fn main() -> Result<(), Box<dyn Error>> {
                 },
                 _ => eprintln!("[ERROR] Unknown parse command"),
             }
+        },
+        Some(("load", _)) => {
+            println!("[INFO] Loading tokens.dat");
+            let tokens_folder: FolderTokens = match load_from_file("tokens.dat".to_string()){
+                Ok(val) => {
+                    println!("[INFO] Successfully loaded tokens.dat");
+                    val
+                },
+                Err(_) => {
+                    eprintln!("[ERROR] Was not able to load tokens.dat..");
+                    exit(1)
+                },
+            };
+
+            let page_lookup: PageInformationMap = match load_from_file("page_lookup.dat".to_string()){
+                Ok(val) => {
+                    println!("[INFO] Successfully loaded tokens.dat");
+                    val
+                },
+                Err(_) => {
+                    eprintln!("[ERROR] Was not able to load tokens.dat..");
+                    exit(1)
+                },
+            };
+
+            println!("\n\n Tokens: {:?}\n",tokens_folder);
+            println!("\n\n Page Information: {:?}\n",page_lookup);
+
+
         },
         _ => eprintln!("[ERROR] Unknown command"),
     }
