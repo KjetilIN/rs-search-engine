@@ -1,6 +1,5 @@
 use std::{error::Error, fs::File, io::{BufReader, Read}};
 
-use crate::types::FolderTokens;
 use serde::{Deserialize, Serialize};
 const CACHE_FILE_PATH: &str = "./cache/";
 

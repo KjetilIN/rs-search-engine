@@ -14,6 +14,11 @@ For parsing the HTML files to a file: <br>
 cargo run parse file
 ```
 
+For loading and viewing the files for the engine: <br>
+```terminal
+cargo run load
+```
+
 ## Search API
 
 Desired output from search 
