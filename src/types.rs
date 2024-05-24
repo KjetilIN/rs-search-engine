@@ -5,7 +5,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Website{
     url: String, 
-    title: String
+    title: String,
+    pub tf_idf_score: f64,
 }
 
 const KUBERNETES_URL: &str = "https://kubernetes.io"; 
@@ -47,7 +48,7 @@ impl Website {
             title
         };
 
-        Self { url, title }
+        Self { url, title, tf_idf_score:0.0 }
     }
     
 }

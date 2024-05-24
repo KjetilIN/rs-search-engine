@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = "";
 
     // Retrieve the search result from localStorage
     const searchResult = localStorage.getItem('searchResult');
@@ -19,12 +20,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const a = document.createElement('a');
             a.href = item.url;
             a.textContent = item.url;
+
             const title = document.createElement('h4');
             title.textContent = item.title;
             title.className = 'title';
-            li.appendChild(title);
-            li.appendChild(a);
-            ul.appendChild(li);
+
+            const score = document.createElement('h5');
+            score.textContent = "Score: " + item.tf_idf_score;
+            score.className = 'score';
+
+            if (item.tf_idf_score > 0){
+                li.appendChild(title);
+                li.appendChild(score);
+                li.appendChild(a);
+                ul.appendChild(li);
+            }
+            
         });
 
         // Append the list to the results div

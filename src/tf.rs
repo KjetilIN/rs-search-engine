@@ -11,7 +11,7 @@ fn count_words(document: &TokenizedDocument) -> usize{
 
 fn document_with_term(term: &String, folder: &FolderTokens) -> usize{
     let mut counter: usize = 0;
-    for (_, document_map) in folder.into_iter(){
+    for (_, document_map) in folder.iter(){
         if document_map.contains_key(term){
             counter += 1;
         }
@@ -19,24 +19,22 @@ fn document_with_term(term: &String, folder: &FolderTokens) -> usize{
     counter
 }
 
-fn term_frequency(term: &String, document: &TokenizedDocument) -> f64{
-    if document.contains_key(term){
-        let word_count = document.get(term).unwrap();
-        let total_word_count = count_words(&document);
-        return (word_count / total_word_count) as f64; 
-    }else{
-        0.0
+fn term_frequency(term: &String, document: &TokenizedDocument) -> f64 {
+    if let Some(&word_count) = document.get(term) {
+        let total_word_count = count_words(document);
+        return word_count as f64 / total_word_count as f64;
     }
+    0.0
 }
 
-fn inverse_document_frequency(term: &String, folder: &FolderTokens) -> f64{
+fn inverse_document_frequency(term: &String, folder: &FolderTokens) -> f64 {
     let n = folder.len();
-    if n == 0{
-        eprintln!("ERROR with n");
-        panic!()
+    let df = document_with_term(term, folder);
+    if df > 0 {
+        (n as f64 / df as f64).log10()
+    } else {
+        0.0
     }
-    let tf = document_with_term(term, folder);
-    (((n+1) / ((tf/n)+1)) as f64).log10()
 }
 
 fn tf_idf(term: String, document: &TokenizedDocument, folder: &FolderTokens) -> f64{
@@ -61,11 +59,12 @@ pub fn search_term(terms: &String, folder: &FolderTokens, page_information: &Pag
 
     // Retrieve the corresponding Website information
     let mut results: Vec<Website> = vec![];
-    for (doc_name, _) in sorted_scores {
-        if let Some(website) = page_information.get(doc_name) {
-            results.push(website.clone());
+    for (doc_name, score) in sorted_scores {
+        if let Some(mut website) = page_information.get(doc_name).cloned() {
+            website.tf_idf_score = score;
+            results.push(website);
         }
     }
-    Ok(results)
 
+    Ok(results)
 }
