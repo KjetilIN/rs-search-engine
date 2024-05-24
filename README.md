@@ -1,5 +1,11 @@
-# Rust Search Engine
-A search engine created with Rust. Parses .md and .html files. 
+<div align="center">
+    <h1>Rust Search Engine</h1>
+    <i>Created by Kjetil Indrehus</i>
+</div>
+
+A search engine created with Rust. Parses .html file of the Kubernetes website and makes it into a search engine!
+
+
 
 
 ## Usage
