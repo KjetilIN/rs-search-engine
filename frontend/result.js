@@ -17,21 +17,26 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create list items for each URL and append to the list
         data.results.forEach(item => {
             const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.href = item.url;
-            a.textContent = item.url;
+
+            const itemHeader = document.createElement('div');
+            itemHeader.className = 'item-header';
 
             const title = document.createElement('h4');
             title.textContent = item.title;
             title.className = 'title';
 
-            const score = document.createElement('h5');
-            score.textContent = "Score: " + item.tf_idf_score;
+            const score = document.createElement('span');
+            score.textContent = "Score: " + Math.ceil(item.tf_idf_score * 100_000) / 100_000;
             score.className = 'score';
 
-            if (item.tf_idf_score > 0){
-                li.appendChild(title);
-                li.appendChild(score);
+            const a = document.createElement('a');
+            a.href = item.url;
+            a.textContent = item.url;
+
+            if (item.tf_idf_score > 0) {
+                itemHeader.appendChild(title);
+                itemHeader.appendChild(score);
+                li.appendChild(itemHeader);
                 li.appendChild(a);
                 ul.appendChild(li);
             }
