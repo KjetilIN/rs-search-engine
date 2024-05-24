@@ -1,9 +1,9 @@
 use tiny_http::{Request, Response};
 use crate::file_operations::read_file;
-use rand::{random, rngs, Rng};
+use rand::random;
 
 fn serve_public_file(file_name:&str, content_type: &str, request: Request) -> (){
-    let file = format!("./src/public/{}", file_name);
+    let file = format!("./frontend/{}", file_name);
     let content = read_file(&file);
 
     match content{
@@ -39,9 +39,10 @@ pub fn handle_get_request(request: Request)-> (){
     match request.url(){
         // INDEX File
         "/" => serve_public_file("index.html", "text/html", request),
-        "/search.html" => serve_public_file("search.html", "text/html", request),
+        "/result" => serve_public_file("result.html", "text/html", request),
         "/style.css" => serve_public_file("style.css", "text/css", request),
         "/script.js" => serve_public_file("script.js", "text/javascript", request),
+        "/result.js" => serve_public_file("result.js", "text/javascript", request),
         _ => handle_bad_request(request)
     }
 }

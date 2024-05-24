@@ -28,7 +28,7 @@ function handleSearchRequests(e){
         localStorage.setItem('searchResult', JSON.stringify(data));
 
         // Redirect to search.html
-        window.location.href = "/search.html";
+        window.location.href = "/result";
     })
     .catch((error) => {
         console.error('Error:', error);
