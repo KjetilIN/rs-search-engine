@@ -1,45 +1,82 @@
-use std::process::exit;
-use tiny_http::{Method, Server};
+use clap::{ Command, Subcommand};
+use std::{error::Error, process::exit};
 
-use crate::api::{handle_bad_request, handle_get_request, handle_post_request};
+use crate::{api::serve_website, file_operations::save_to_file, types::FolderTokens};
 
-mod parse;
-pub mod types;
-pub mod tf;
+
+pub mod parse;
 pub mod api;
 pub mod file_operations;
+pub mod tf;
+pub mod types;
 
-fn main() {
+#[derive(Subcommand)]
+enum Commands {
+    Serve,
+    Parse {
+        #[clap(subcommand)]
+        parse_cmd: ParseCommand,
+    },
+}
 
-    let addr = "127.0.0.1:8080";
-    let server = Server::http(addr).unwrap_or_else(|err| {
-        eprintln!("[ERROR] Could not start HTTP server on {addr}: {err}");
-        exit(1)
-    });
+#[derive(Subcommand)]
+enum ParseCommand {
+    File,
+    Db,
+}
 
-    println!("[INFO] Serving a HTTP server on {addr}");
+const FOLDER_PATH: &str = "./pages/";
 
-    loop {
-        // Read request from server
-        let request = match server.recv(){
-            Ok(req) => req,
-            Err(err) => {
-                eprintln!("[ERROR] Could not handle request: {err}");
-                continue;
-            } 
-        }; 
-        println!("[INFO] URL {}", request.url()); 
+fn main() -> Result<(), Box<dyn Error>> {
+    let matches = Command::new("RS Engine")
+        .version("1.0")
+        .about("Search engine CLI")
+        .subcommand_required(true)
+        .arg_required_else_help(true)
+        .subcommand(
+            Command::new("serve")
+                .about("Run the webserver in the browser"),
+        )
+        .subcommand(
+            Command::new("parse")
+                .about("Parse HTML files for the search engine")
+                .subcommand(
+                    Command::new("file")
+                        .about("Save to file in ./cache/hashmap_cache.dat")
+                )
+                .subcommand(
+                    Command::new("db")
+                        .about("Save to database")
+                )
+        )
+        .get_matches();
 
-        // Handle requests based on methods
-        match request.method() {
-            Method::Get => handle_get_request(request),
-            Method::Post => handle_post_request(request),
-            _ => handle_bad_request(request),
-        }   
+    match matches.subcommand() {
+        Some(("serve", _)) => {
+            println!("[INFO] Starting webserver...");
+            serve_website();
+        },
+        Some(("parse", sub_m)) => {
+            match sub_m.subcommand() {
+                Some(("file", _)) => {
+                    println!("[INFO] Parsing to file...");
+                    let documents: FolderTokens = parse::parse_dir(FOLDER_PATH, true, true).unwrap();
+                    match save_to_file(documents){
+                        Ok(_) => println!("[INFO] Saved to file!"),
+                        Err(_) => exit(1),
+                    }
+
+                },
+                Some(("db", _)) => {
+                    println!("[ERROR] Database not implemented yet");
+                },
+                _ => eprintln!("[ERROR] Unknown parse command"),
+            }
+        },
+        _ => eprintln!("[ERROR] Unknown command"),
     }
 
-    //let folder_path: &str = "./pages/";
-    //let documents: FolderTokens = parse::parse_dir(folder_path, true, true).unwrap();
-    //println!("FOLDER: {:?}", documents);
+    Ok(())
 
+    
 }
