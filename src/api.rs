@@ -1,7 +1,8 @@
 use std::process::exit;
 
+use serde_json::json;
 use tiny_http::{Method, Request, Response, Server};
-use crate::file_operations::read_file;
+use crate::{file_operations::{load_from_file, read_file}, tf::search_term, types::{FolderTokens, PageInformationMap, Website}};
 use rand::random;
 
 fn serve_public_file(file_name:&str, content_type: &str, request: Request) -> (){
@@ -49,7 +50,7 @@ pub fn handle_get_request(request: Request)-> (){
     }
 }
 
-pub fn handle_post_request(mut request: Request) -> (){
+pub fn handle_post_request(mut request: Request, tokens: &FolderTokens, page_information: &PageInformationMap) -> (){
     match request.url() {
         "/api/search" => {
             let mut content = String::new();
@@ -61,28 +62,27 @@ pub fn handle_post_request(mut request: Request) -> (){
                     return;
                 },
             }
-            println!("[INFO] POST Request: {content}");
+            println!("[INFO] POST Request Searched: '{content}'");
 
-            // Mocked search
-            let urls: Vec<String> = (0..3)
-                .map(|_| format!("http://{}.com/{}", content, random::<u32>()))
-                .collect();
+            let search_results: Vec<Website> = match search_term(&content, tokens, page_information){
+                Ok(val) => val,
+                Err(_) => {
+                    eprintln!("[ERROR] Server was not able to search for term");
+                    return;
+                },
+            };
 
-            println!("URLS: {:?}", urls);
-
-            // Manually creating json format of the results
-            let json = format!(
-                "{{\"urls\": [\"{}\"]}}",
-                urls.join("\",\"")
-            );
-
-            println!("JSON: {json}");
+            // Serialize to JSON
+            let json = json!({
+                "results": search_results
+            });
+            // Convert the JSON value to a string
+            let json_string = serde_json::to_string(&json).expect("Failed to serialize to JSON");
 
             // Creating response object
-            let response = Response::from_string(json)
+            let response = Response::from_string(json_string)
                                                                 .with_header(tiny_http::Header::from_bytes(&b"Content-Type"[..], &"application/json".as_bytes()[..]).unwrap())
                                                                 .with_status_code(200);
-
 
             // Respond
             if let Err(err) = request.respond(response) {
@@ -105,6 +105,29 @@ pub fn serve_website(){
 
     println!("[INFO] Serving a HTTP server on {addr}");
 
+    println!("[INFO] Loading tokens...");
+
+    // Load the files as Hashmaps
+    let folder_tokens: FolderTokens = match load_from_file("tokens.dat".to_string()){
+        Ok(val) => val,
+        Err(err) => {
+            eprintln!("[ERROR] Tokenized document not parsed (token.dat): {err}");
+            exit(1);
+        },
+    };
+    println!("[INFO] Tokens loaded");
+
+    println!("[INFO] Loading lookup table...");
+    let page_information: PageInformationMap = match load_from_file("page_lookup.dat".to_string()) {
+        Ok(val) => val,
+        Err(err) => {
+            eprintln!("[ERROR] Page Information not parsed (page_lookup.dat): {err}");
+            exit(1);
+        },
+        
+    };
+    println!("[INFO] Page information loaded");
+
     loop {
         // Read request from server
         let request = match server.recv(){
@@ -119,7 +142,7 @@ pub fn serve_website(){
         // Handle requests based on methods
         match request.method() {
             Method::Get => handle_get_request(request),
-            Method::Post => handle_post_request(request),
+            Method::Post => handle_post_request(request, &folder_tokens, &page_information),
             _ => handle_bad_request(request),
         }   
     }

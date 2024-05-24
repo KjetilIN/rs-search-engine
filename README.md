@@ -30,12 +30,10 @@ Desired output from search
         {
             "url": "https://example.com",
             "title": "Example Domain",
-            "description": "This domain is for use in illustrative examples in documents."
         },
         {
             "url": "https://anotherexample.com",
             "title": "Another Example",
-            "description": "This is another example of a search result description."
         }
     ]
 }

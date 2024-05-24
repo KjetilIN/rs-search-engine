@@ -14,15 +14,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const ul = document.createElement('ul');
 
         // Create list items for each URL and append to the list
-        data.urls.forEach(url => {
+        data.results.forEach(item => {
             const li = document.createElement('li');
             const a = document.createElement('a');
-            a.href = url;
-            a.textContent = url;
-            const desc = document.createElement('p');
-            desc.textContent = "Description"
-            desc.className = 'description';
-            li.appendChild(desc);
+            a.href = item.url;
+            a.textContent = item.url;
+            const title = document.createElement('h4');
+            title.textContent = item.title;
+            title.className = 'title';
+            li.appendChild(title);
             li.appendChild(a);
             ul.appendChild(li);
         });
