@@ -4,8 +4,14 @@ A search engine created with Rust. Parses .md and .html files.
 
 ## Usage
 
+For running the webserver: <br>
 ```terminal
-cargo run
+cargo run serve
+```
+
+For parsing the HTML files to a file: <br>
+```terminal
+cargo run parse file
 ```
 
 ## Search API
