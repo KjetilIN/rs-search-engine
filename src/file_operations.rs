@@ -1,8 +1,8 @@
 use std::{error::Error, fs::File, io::{BufReader, Read}};
 
 use crate::types::FolderTokens;
-
-const CACHE_FILE_PATH: &str = "./cache/hashmap_cache.dat";
+use serde::Serialize;
+const CACHE_FILE_PATH: &str = "./cache/";
 
 pub fn read_file(file_path: &str) -> Result<String, Box<dyn Error>>{
     // Read the file 
@@ -26,8 +26,9 @@ pub fn read_file(file_path: &str) -> Result<String, Box<dyn Error>>{
     Ok(content)
 }
 
-pub fn save_to_file(folder:FolderTokens) -> Result<(), Box<dyn Error>>{
-    let file = match File::create(CACHE_FILE_PATH){
+pub fn save_to_file<T: Serialize>(file_name:String, data:T) -> Result<(), Box<dyn Error>>{
+    let path = format!("{}{}", CACHE_FILE_PATH, file_name);
+    let file = match File::create(path){
         Ok(f) => f,
         Err(err) => {
             eprintln!("[ERROR] Could not create file: {err}");
@@ -35,7 +36,7 @@ pub fn save_to_file(folder:FolderTokens) -> Result<(), Box<dyn Error>>{
         },
     };
 
-    match bincode::serialize_into(file, &folder){
+    match bincode::serialize_into(file, &data){
         Ok(_) => return Ok(()),
         Err(err) => {
             eprintln!("[ERROR] Could write to file: {err}");
