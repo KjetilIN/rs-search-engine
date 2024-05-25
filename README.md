@@ -5,7 +5,7 @@
 
 <div align="center">
     <br />
-    <img alt="version" src="https://img.shields.io/badge/version-1.0.0-blue" />
+    <img alt="version" src="https://img.shields.io/badge/version-0.1.0-blue" />
     <img alt="Rust" src="https://img.shields.io/badge/rust-1.74-orange?logo=rust" />
 
 </div>
