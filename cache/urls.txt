@@ -1,0 +1,10 @@
+https://www.gutenberg.org/cache/epub/57532/pg57532-images.html ; Passages from the Life of a Philosopher
+https://www.gutenberg.org/cache/epub/69512/pg69512-images.html ; The calculus of logic
+https://www.gutenberg.org/cache/epub/55280/pg55280-images.html ; An Enquiry into the Life and Legend of Michael Scot
+https://www.gutenberg.org/cache/epub/4763/pg4763-images.html ; The Game of Logic
+https://www.gutenberg.org/cache/epub/28696/pg28696-images.html ; Symbolic Logic
+https://www.gutenberg.org/cache/epub/39702/pg39702-images.html ; The philosophy of mathematics
+https://www.gutenberg.org/cache/epub/26752/pg26752-images.html ; The Way To Geometry
+https://www.gutenberg.org/cache/epub/71292/pg71292-images.html ; The calculating engine
+https://www.gutenberg.org/cache/epub/27468/pg27468-images.html ; IBM 1401 Programming Systems
+https://www.gutenberg.org/cache/epub/72572/pg72572-images.html ; Computers—the machines we think with
