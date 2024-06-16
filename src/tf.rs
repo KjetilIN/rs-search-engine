@@ -1,18 +1,21 @@
+use crate::{
+    page_information::Website,
+    types::{FolderTokens, PageInformationMap, TokenizedDocument},
+};
 use std::{collections::HashMap, error::Error};
-use crate::{page_information::Website, types::{FolderTokens, PageInformationMap, TokenizedDocument}};
 
-fn count_words(document: &TokenizedDocument) -> usize{
-    let mut counter:usize = 0; 
-    for (_, value) in document.into_iter(){
+fn count_words(document: &TokenizedDocument) -> usize {
+    let mut counter: usize = 0;
+    for (_, value) in document.into_iter() {
         counter += value;
     }
     counter
 }
 
-fn document_with_term(term: &String, folder: &FolderTokens) -> usize{
+fn document_with_term(term: &String, folder: &FolderTokens) -> usize {
     let mut counter: usize = 0;
-    for (_, document_map) in folder.iter(){
-        if document_map.contains_key(term){
+    for (_, document_map) in folder.iter() {
+        if document_map.contains_key(term) {
             counter += 1;
         }
     }
@@ -37,11 +40,15 @@ fn inverse_document_frequency(term: &String, folder: &FolderTokens) -> f64 {
     }
 }
 
-fn tf_idf(term: String, document: &TokenizedDocument, folder: &FolderTokens) -> f64{
+fn tf_idf(term: String, document: &TokenizedDocument, folder: &FolderTokens) -> f64 {
     return term_frequency(&term, document) * inverse_document_frequency(&term, folder);
 }
 
-pub fn search_term(terms: &String, folder: &FolderTokens, page_information: &PageInformationMap) -> Result<Vec<Website>, Box<dyn Error>> {
+pub fn search_term(
+    terms: &String,
+    folder: &FolderTokens,
+    page_information: &PageInformationMap,
+) -> Result<Vec<Website>, Box<dyn Error>> {
     let search_terms: Vec<&str> = terms.split_whitespace().collect();
     let mut scores: HashMap<&String, f64> = HashMap::new();
 

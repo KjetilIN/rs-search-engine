@@ -29,6 +29,7 @@ enum ParseCommand {
     Db,
 }
 
+// Path to the folder with all the html files to be parsed 
 const FOLDER_PATH: &str = "./pages/";
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -50,12 +51,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         )
         .get_matches();
 
+    // Subcommands for the binary 
     match matches.subcommand() {
+        // Host HTTP server 
         Some(("serve", _)) => {
             println!("[INFO] Starting webserver...");
             serve_website();
         }
-        Some(("parse", sub_m)) => match sub_m.subcommand() {
+
+        // Index to either file or db 
+        Some(("index", sub_m)) => match sub_m.subcommand() {
             Some(("file", _)) => {
                 println!("[INFO] Parsing to file...");
                 let (documents, page_information) =
@@ -77,6 +82,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
             _ => eprintln!("[ERROR] Unknown parse command"),
         },
+        
+        // Check the indexed files by loading them and printing 
         Some(("load", _)) => {
             println!("[INFO] Loading tokens.dat");
             let tokens_folder: FolderTokens = match load_from_file("tokens.dat".to_string()) {
