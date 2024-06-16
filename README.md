@@ -24,9 +24,9 @@ This project is a custom search engine built with Rust, designed specifically fo
 - **HTML Parsing:** Efficiently parses HTML files from the Kubernetes website.
 - **Tokenization:** Breaks down the content into individual tokens (words) for analysis.
 - **TF-IDF Scoring:** Uses TF-IDF to score and rank documents based on their relevance to the search query.
+- **Multithreaded Indexer:** Parses documents concurrently using `rayon` for improved performance.
 - **Rust Backend:** Utilizes Rust and the tiny_http library to serve search requests.
 - **Frontend Interface:** Provides a frontend created by vanilla HTML/CSS.
-
 
 ## Usage
 

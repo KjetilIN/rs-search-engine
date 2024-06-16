@@ -1,13 +1,14 @@
+use std::sync::{Arc, Mutex};
 use std::{collections::HashMap, process::exit};
 use std::error::Error;
 use regex::Regex;
 use walkdir::WalkDir;
 use crate::types::{PageInformationMap, Website};
+use rayon::prelude::*;
 use crate::{file_operations::read_file, types::{FolderTokens, TokenizedDocument}};
 
 
 const URLS_PATH: &str = "./cache/urls.txt";
-
 
 pub fn parse_file_html(file_path: &str) -> Result<String, Box<dyn Error>>{
     // Only allow html files to be parsed 
@@ -47,85 +48,102 @@ pub fn parse_file_md(file_path: &str) -> Result<Option<TokenizedDocument>, Box<d
     unimplemented!("Parse Markdown File")
 }
 
+/// Multithreaded dir parser using rayon
+/// 
+/// - folder_path => path of the directory to be parsed
+/// - log_enabled => set to True for logging
+/// - exit_on_parse_error => set to true if exit on any error
+/// 
+/// Return a Result of tuple of the `FoldersTokens` and `PageInformation` if the parsing went okay
 pub fn parse_dir(folder_path: &str, log_enabled: bool, exit_on_parse_error: bool) -> Result<(FolderTokens, PageInformationMap), ()> {
-    let mut folder_tokens: FolderTokens = HashMap::new();
-    let mut page_information_map: PageInformationMap = HashMap::new();
+    // Create hashmaps that are going to be shared resources
+    // - Arc => for shared ownership without copying the code
+    // - Mutex => for making sure only one thread can access at the time
+    let folder_tokens = Arc::new(Mutex::new(HashMap::new()));
+    let page_information_map = Arc::new(Mutex::new(HashMap::new()));
     let urls = read_urls_file(&URLS_PATH).unwrap();
 
     let walker = WalkDir::new(folder_path).into_iter();
 
-    for entry in walker{
-        match entry {
-            Ok(entry) => {
-                let path = entry.path();
-                if path.is_file() {
-                    // Log the current file
-                    if log_enabled {
-                        println!("[INFO] Parsing file {}", path.display());
-                    }
-
-                    // Get the file number
-                    let url_index = entry.path()
-                                        .to_string_lossy()
-                                        .strip_prefix("./pages/file")
-                                        .unwrap()
-                                        .strip_suffix(".html")
-                                        .unwrap()
-                                        .parse::<usize>()
-                                        .unwrap();
-                            
-                    let document_content: String = match parse_file_html(path.to_str().unwrap()) {
-                        Ok(value) => value,
-                        Err(_) => {
-                            if log_enabled {
-                                println!("[ERROR] Could not parse file {}", path.display());
-                            }
-
-                            if exit_on_parse_error {
-                                exit(1);
-                            }
-
-                            return Err(());
-                        },
-                    };
-
-                    if document_content.is_empty(){
-                        continue;
-                    }
-
-                    // Create the website object
-                    let url: &String = &urls[url_index - 1];
-                    let website = Website::from_html(&document_content, &url);
-                    let tokens = match tokenize_document(document_content){
-                        Ok(value) => value,
-                        Err(_) => {
-                            if log_enabled {
-                                println!("[ERROR] Could not tokenize file {}", path.display());
-                            }
-
-                            if exit_on_parse_error {
-                                exit(1);
-                            }
-
-                            return Err(());
-                        },
-                    };
-                   
-                    folder_tokens.insert(path.to_string_lossy().to_string(), tokens);
-                    page_information_map.insert(path.to_string_lossy().to_string(), website);
-                    
-                }
-            }
-            Err(err) => {
+    // Use rayon's parallel iterator to multithread the parsing og the files 
+    walker
+        .filter_map(Result::ok)
+        .par_bridge()
+        .for_each(|entry| {
+            let path = entry.path();
+            if path.is_file() {
+                // Log the current file
                 if log_enabled {
-                    eprintln!("[ERROR] Failed to read entry: {}", err);
+                    println!("[INFO] Parsing file {}", path.display());
                 }
-                if exit_on_parse_error {
-                    exit(1);
+
+                // Get the file number
+                let url_index = match path
+                    .to_string_lossy()
+                    .strip_prefix("./pages/file")
+                    .and_then(|s| s.strip_suffix(".html"))
+                    .and_then(|s| s.parse::<usize>().ok()) 
+                {
+                    Some(index) => index,
+                    None => {
+                        if log_enabled {
+                            println!("[ERROR] Invalid file name format {}", path.display());
+                        }
+                        if exit_on_parse_error {
+                            exit(1);
+                        }
+                        return;
+                    }
+                };
+
+                let document_content: String = match parse_file_html(path.to_str().unwrap()) {
+                    Ok(value) => value,
+                    Err(_) => {
+                        if log_enabled {
+                            println!("[ERROR] Could not parse file {}", path.display());
+                        }
+                        if exit_on_parse_error {
+                            exit(1);
+                        }
+                        return;
+                    },
+                };
+
+                if document_content.is_empty() {
+                    return;
+                }
+
+                // Create the website object
+                let url: &String = &urls[url_index - 1];
+                let website = Website::from_html(&document_content, &url);
+                let tokens = match tokenize_document(document_content) {
+                    Ok(value) => value,
+                    Err(_) => {
+                        if log_enabled {
+                            println!("[ERROR] Could not tokenize file {}", path.display());
+                        }
+                        if exit_on_parse_error {
+                            exit(1);
+                        }
+                        return;
+                    },
+                };
+
+                // Insert into shared collections
+                {
+                    let mut folder_tokens = folder_tokens.lock().unwrap();
+                    folder_tokens.insert(path.to_string_lossy().to_string(), tokens);
+                }
+                {
+                    let mut page_information_map = page_information_map.lock().unwrap();
+                    page_information_map.insert(path.to_string_lossy().to_string(), website);
                 }
             }
-        }
-    }
+        });
+
+        let folder_tokens = Arc::try_unwrap(folder_tokens).expect("Arc still has multiple owners").into_inner().expect("Mutex cannot be locked");
+        let page_information_map = Arc::try_unwrap(page_information_map).expect("Arc still has multiple owners").into_inner().expect("Mutex cannot be locked");
+    
 
     Ok((folder_tokens, page_information_map))
 }
