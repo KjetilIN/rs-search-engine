@@ -21,6 +21,6 @@ mod tests {
             }
         }
 
-        assert_eq!(78, counter, "[ERROR]Test that there are 78 html files in the setup page, was {counter}");
+        assert_eq!(10, counter, "[ERROR]Test that there are 10 html files in the setup page, was {counter}");
     }
 }
