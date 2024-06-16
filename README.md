@@ -5,7 +5,7 @@
 
 <div align="center">
     <br />
-    <img alt="version" src="https://img.shields.io/badge/version-0.1.0-blue" />
+    <img alt="version" src="https://img.shields.io/badge/version-0.2.0-blue" />
     <img alt="Rust" src="https://img.shields.io/badge/rust-1.74-orange?logo=rust" />
 
 </div>
@@ -26,7 +26,7 @@ This project is a custom search engine built with Rust, designed specifically fo
 - **Rust Backend:** Utilizes Rust and the tiny_http library to serve search requests.
 - **Frontend Interface:** Provides a frontend created by vanilla HTML/CSS.
 
-## Usage
+## Run Locally
 
 Running the webserver: <br>
 ```terminal
@@ -44,13 +44,15 @@ cargo run load
 
 **NOTE** Set `domain` variable in `./frontend/script.js` to `0.0.0.0:8080`
 
-### Docker
+## Run with Docker
 
 Running the application with docker is simple: 
 ```terminal
 docker compose up --build 
 ```
 (add `-d` option for running detached)
+
+![Screenshot from 2024-06-16 17-04-50](https://github.com/KjetilIN/rs-search-engine/assets/66110094/47b97a54-048f-4fb9-aa4f-93b8c63c3684)
 
 
 Read more about [Docker Compose here.](https://docs.docker.com/compose/reference/)
@@ -80,7 +82,7 @@ cargo run parse file
 cargo run serve 
 ```
 
-## 2. Setup your own search engine files 
+### 2. Setup your own search engine files 
 
 1. Create a list of urls that you want to index. Each url must lead to a html file form the [www.gutenberg.org](www.gutenberg.org) website. Store them with the url and title separated with a semicolon in `./cache/urls.txt`. For example: 
 ```text
