@@ -65,8 +65,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                     println!("[INFO] Parsing to file...");
                     let (documents, page_information ) = parse::parse_dir(FOLDER_PATH, true, true).unwrap();
 
-                    println!("{:?}", page_information);
-
                     match save_to_file("tokens.dat".to_owned(),documents){
                         Ok(_) => println!("[INFO] Saved tokens.dat to file!"),
                         Err(_) => exit(1),

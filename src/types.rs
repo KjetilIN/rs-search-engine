@@ -1,54 +1,43 @@
 use std::collections::HashMap;
 
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Website{
     url: String, 
     title: String,
+    release: String,
     pub tf_idf_score: f64,
 }
 
-const KUBERNETES_URL: &str = "https://kubernetes.io"; 
-
 impl Website {
-    pub fn from_html(content: &str, file_path: &str) -> Self{
+    pub fn from_html(content: &str, url:&str) -> Self{
+        let mut title = String::new();
+        let mut release: String = String::new();
 
-        let url = if file_path.ends_with("_index.html") {
-            // Remove "index.html" and append the rest to the base URL
-            let path = &file_path[..file_path.len() - "_index.html".len()];
-            format!("{}{}", KUBERNETES_URL, &path[7..])
-        } else if file_path.ends_with("index.html"){
-            let path = &file_path[..file_path.len() - "index.html".len()];
-            format!("{}{}", KUBERNETES_URL, &path[7..])
+        // Iterate trough the lines
+        for line in content.lines(){
+            if !release.is_empty(){
+                break;
+            }
 
-        }else {
-            format!("{}{}", KUBERNETES_URL, &file_path[7..])
-        };
+            let tag_regex: Regex = Regex::new(r"<[^>]*>").unwrap();
+            let line_to_tokenize: String = tag_regex.replace_all(&line, "").to_string();
 
-        // Extract title from the content, assuming title is in the second line
-        let raw_title = content.lines().nth(1).unwrap_or_default().to_string();
+            if let Some(new_title) = line_to_tokenize.trim().strip_prefix("Title:") {
+                title = new_title.trim().to_string();
+            } else if let Some(release_line) = line.trim().strip_prefix("Release date:") {
+                release = release_line.chars().take_while(|&x| x != '[').collect();
+            }
+        }
 
-        // Remove "title: " prefix if present
-        let title_prefix = "title: ";
-        let title = if raw_title.to_lowercase().starts_with(title_prefix) {
-            raw_title[title_prefix.len()..].to_string()
-        } else {
-            raw_title
-        };
-
-        // If title is still empty, extract the last folder name from the file path
-        let title = if title.is_empty() {
-            file_path
-                .rsplit('/')
-                .nth(1) // nth(1) to get the last folder name instead of the file name
-                .unwrap_or("Default")
-                .to_string()
-        } else {
-            title
-        };
-
-        Self { url, title, tf_idf_score:0.0 }
+        Self { 
+            url:url.to_string(), 
+            title,
+            release, 
+            tf_idf_score:0.0 
+        }
     }
     
 }

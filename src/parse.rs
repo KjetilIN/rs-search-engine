@@ -6,6 +6,9 @@ use crate::types::{PageInformationMap, Website};
 use crate::{file_operations::read_file, types::{FolderTokens, TokenizedDocument}};
 
 
+const URLS_PATH: &str = "./cache/urls.txt";
+
+
 pub fn parse_file_html(file_path: &str) -> Result<String, Box<dyn Error>>{
     // Only allow html files to be parsed 
     if !file_path.ends_with(".html"){
@@ -47,10 +50,11 @@ pub fn parse_file_md(file_path: &str) -> Result<Option<TokenizedDocument>, Box<d
 pub fn parse_dir(folder_path: &str, log_enabled: bool, exit_on_parse_error: bool) -> Result<(FolderTokens, PageInformationMap), ()> {
     let mut folder_tokens: FolderTokens = HashMap::new();
     let mut page_information_map: PageInformationMap = HashMap::new();
+    let urls = read_urls_file(&URLS_PATH).unwrap();
 
     let walker = WalkDir::new(folder_path).into_iter();
 
-    for entry in walker {
+    for entry in walker{
         match entry {
             Ok(entry) => {
                 let path = entry.path();
@@ -60,6 +64,16 @@ pub fn parse_dir(folder_path: &str, log_enabled: bool, exit_on_parse_error: bool
                         println!("[INFO] Parsing file {}", path.display());
                     }
 
+                    // Get the file number
+                    let url_index = entry.path()
+                                        .to_string_lossy()
+                                        .strip_prefix("./pages/file")
+                                        .unwrap()
+                                        .strip_suffix(".html")
+                                        .unwrap()
+                                        .parse::<usize>()
+                                        .unwrap();
+                            
                     let document_content: String = match parse_file_html(path.to_str().unwrap()) {
                         Ok(value) => value,
                         Err(_) => {
@@ -80,7 +94,8 @@ pub fn parse_dir(folder_path: &str, log_enabled: bool, exit_on_parse_error: bool
                     }
 
                     // Create the website object
-                    let website = Website::from_html(&document_content, &path.to_string_lossy().to_string());
+                    let url: &String = &urls[url_index - 1];
+                    let website = Website::from_html(&document_content, &url);
                     let tokens = match tokenize_document(document_content){
                         Ok(value) => value,
                         Err(_) => {
@@ -98,7 +113,6 @@ pub fn parse_dir(folder_path: &str, log_enabled: bool, exit_on_parse_error: bool
                    
                     folder_tokens.insert(path.to_string_lossy().to_string(), tokens);
                     page_information_map.insert(path.to_string_lossy().to_string(), website);
-
                     
                 }
             }
@@ -114,4 +128,21 @@ pub fn parse_dir(folder_path: &str, log_enabled: bool, exit_on_parse_error: bool
     }
 
     Ok((folder_tokens, page_information_map))
+}
+
+pub fn read_urls_file(file_path:&str) -> Result<Vec<String>, ()>{
+    let mut vec: Vec<String> = Vec::new();
+    let file = read_file(file_path);
+    if let Ok(content) = file{
+        for line in content.lines(){
+            let tokens: Vec<&str> = line.split(";").into_iter().collect();
+            if tokens.len() != 2{
+                return Err(())
+            }
+            vec.push(tokens[0].to_string())
+        }
+        
+        return Ok(vec);
+    }
+    Err(())
 }
