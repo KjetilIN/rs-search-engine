@@ -35,9 +35,9 @@ For running the webserver: <br>
 cargo run serve
 ```
 
-For parsing the HTML files to a file: <br>
+For indexing the HTML files to a file: <br>
 ```terminal
-cargo run parse file
+cargo run index file
 ```
 
 For loading and viewing the files for the engine: <br>
