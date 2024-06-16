@@ -1,8 +1,8 @@
 let searchButton = document.querySelector("#searchbutton");
 let input = document.querySelector("#searchbar");
 
-// Domain of the server 
-const domain = "http://127.0.0.1:8080"; 
+// Domain of the server (including the protocol)
+const domain = "http://localhost:8080";
 
 // Handle Search Requests 
 function handleSearchRequests(e){

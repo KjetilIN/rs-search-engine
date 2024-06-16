@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .arg_required_else_help(true)
         .subcommand(Command::new("serve").about("Run the webserver in the browser"))
         .subcommand(
-            Command::new("parse")
+            Command::new("index")
                 .about("Parse HTML files for the search engine")
                 .subcommand(Command::new("file").about("Save to file(s)"))
                 .subcommand(Command::new("db").about("Save to database")),

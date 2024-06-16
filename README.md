@@ -14,9 +14,7 @@
 This project is a custom search engine built with Rust, designed specifically for the Kubernetes website. It parses HTML files from the Kubernetes website and leverages TF-IDF (Term Frequency-Inverse Document Frequency) for scoring the relevance of documents, providing accurate and efficient search results. The search engine is composed of two main components: the backend server and the frontend interface. The backend server, implemented in Rust, processes HTML files, tokenizes the content, and calculates TF-IDF scores to determine the relevance of documents based on search terms. The frontend interface allows users to input search queries and view the ranked search results.
 
 
-
 [Screencast from 24. mai 2024 kl. 17.35 +0200.webm](https://github.com/KjetilIN/rs-search-engine/assets/66110094/9d9f5832-7031-456d-80d4-d9c90bc6d4e1)
-
 
 
 ## Key Features
@@ -30,11 +28,10 @@ This project is a custom search engine built with Rust, designed specifically fo
 
 ## Usage
 
-For running the webserver: <br>
+Running the webserver: <br>
 ```terminal
 cargo run serve
 ```
-
 For indexing the HTML files to a file: <br>
 ```terminal
 cargo run index file
@@ -43,6 +40,67 @@ cargo run index file
 For loading and viewing the files for the engine: <br>
 ```terminal
 cargo run load
+```
+
+**NOTE** Set `domain` variable in `./frontend/script.js` to `0.0.0.0:8080`
+
+### Docker
+
+Running the application with docker is simple: 
+```terminal
+docker compose up --build 
+```
+(add `-d` option for running detached)
+
+
+Read more about [Docker Compose here.](https://docs.docker.com/compose/reference/)
+
+**NOTE** Set `domain` variable in `./frontend/script.js` to `localhost:8080`
+
+## Setup 
+
+There is two options for setting up the project.
+
+1. Use my files as documents (easiest)
+2. Setup your own search engine files 
+
+
+### 1. Use my files as document
+
+1. Unzip the pages directory locally:
+```terminal 
+tar -xvf ./cache/pages.tar.gz .
+```
+2. Re-index the documents
+```terminal 
+cargo run parse file 
+```
+3. Start the HTTP server locally 
+```terminal 
+cargo run serve 
+```
+
+## 2. Setup your own search engine files 
+
+1. Create a list of urls that you want to index. Each url must lead to a html file form the [www.gutenberg.org](www.gutenberg.org) website. Store them with the url and title separated with a semicolon in `./cache/urls.txt`. For example: 
+```text
+https://www.gutenberg.org/cache/epub/57532/pg57532-images.html ; Passages from the Life of a Philosopher
+https://www.gutenberg.org/cache/epub/69512/pg69512-images.html ; The calculus of logic
+https://www.gutenberg.org/cache/epub/55280/pg55280-images.html ; An Enquiry into the Life and Legend of Michael Scot
+....
+```
+2. Create a pages directory
+```terminal
+mkdir -p ./pages/
+```
+3. Download each html file and set the name of each file equal to `file<INDEX>.html`, where INDEX is equal to the line number of the file in `./cache/urls.txt`. Store each file in the `./pages/` directory. 
+4. Re-index the documents
+```terminal 
+cargo run parse file 
+```
+5. Start the HTTP server locally 
+```terminal 
+cargo run serve 
 ```
 
 ## Search API

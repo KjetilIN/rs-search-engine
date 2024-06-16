@@ -96,7 +96,7 @@ pub fn parse_dir(
             if path.is_file() {
                 // Log the current file
                 if log_enabled {
-                    println!("[INFO] Parsing file {}", path.display());
+                    println!("[INFO] Start parsing file: {}", path.display());
                 }
 
                 // Get the file number
@@ -148,6 +148,11 @@ pub fn parse_dir(
                 {
                     let mut page_information_map = page_information_map.lock().unwrap();
                     page_information_map.insert(path.to_string_lossy().to_string(), website);
+                }
+
+                // Log the current file
+                if log_enabled {
+                    println!("[INFO] File parsed: {}", path.display());
                 }
             }
         });

@@ -126,7 +126,7 @@ pub fn handle_post_request(
 
 /// Creates a HTTP server and handles all incoming requests 
 pub fn serve_website() {
-    let addr = "127.0.0.1:8080";
+    let addr = "0.0.0.0:8080";
     let server = Server::http(addr).unwrap_or_else(|err| {
         eprintln!("[ERROR] Could not start HTTP server on {addr}: {err}");
         exit(1)

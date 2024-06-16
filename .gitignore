@@ -20,3 +20,5 @@ Cargo.lock
 
 # Ignore the pages tracked themself
 /pages/
+
+.env

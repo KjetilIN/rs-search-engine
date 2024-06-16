@@ -1,0 +1,15 @@
+services:
+  rs-search-engine:
+    container_name: rs-search-engine
+    build:
+      context: .
+      target: final
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./cache:/bin/cache
+      - ./frontend:/bin/frontend
+    environment:
+      - RUST_LOG=info
+      - SERVER_DOMAIN=http://localhost:8080
+    restart: always
