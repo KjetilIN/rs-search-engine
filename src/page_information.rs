@@ -2,21 +2,22 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Website{
-    url: String, 
+pub struct Website {
+    url: String,
     title: String,
     release: String,
+    pub file_path: String,
     pub tf_idf_score: f64,
 }
 
 impl Website {
-    pub fn from_html(content: &str, url:&str) -> Self{
+    pub fn from_html(content: &str, url: &str, file_path:&str) -> Self {
         let mut title = String::new();
         let mut release: String = String::new();
 
         // Iterate trough the lines
-        for line in content.lines(){
-            if !release.is_empty(){
+        for line in content.lines() {
+            if !release.is_empty() {
                 break;
             }
 
@@ -30,12 +31,12 @@ impl Website {
             }
         }
 
-        Self { 
-            url:url.to_string(), 
+        Self {
+            url: url.to_string(),
             title,
-            release, 
-            tf_idf_score:0.0 
+            release,
+            file_path: file_path.to_string(),
+            tf_idf_score: 0.0,
         }
     }
-    
 }
