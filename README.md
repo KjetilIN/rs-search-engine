@@ -11,7 +11,7 @@
 </div>
 <br />
 
-This project is a custom search engine built with Rust, designed specifically for the Kubernetes website. It parses HTML files from the Kubernetes website and leverages TF-IDF (Term Frequency-Inverse Document Frequency) for scoring the relevance of documents, providing accurate and efficient search results. The search engine is composed of two main components: the backend server and the frontend interface. The backend server, implemented in Rust, processes HTML files, tokenizes the content, and calculates TF-IDF scores to determine the relevance of documents based on search terms. The frontend interface allows users to input search queries and view the ranked search results.
+This project is a custom search engine built with Rust, designed specifically for [gutenberg.org](https://www.gutenberg.org) books. It parses HTML files from the Kubernetes website and leverages TF-IDF (Term Frequency-Inverse Document Frequency) for scoring the relevance of documents, providing accurate and efficient search results. The search engine is composed of two main components: the backend server and the frontend interface. The backend server, implemented in Rust, processes HTML files, tokenizes the content, and calculates TF-IDF scores to determine the relevance of documents based on search terms. The frontend interface allows users to input search queries and view the ranked search results.
 
 
 [Screencast from 24. mai 2024 kl. 17.35 +0200.webm](https://github.com/KjetilIN/rs-search-engine/assets/66110094/9d9f5832-7031-456d-80d4-d9c90bc6d4e1)
