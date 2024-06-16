@@ -8,6 +8,7 @@ pub mod parse;
 pub mod api;
 pub mod file_operations;
 pub mod tf;
+pub mod page_information;
 pub mod types;
 
 #[derive(Subcommand)]

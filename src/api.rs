@@ -2,7 +2,7 @@ use std::process::exit;
 
 use serde_json::json;
 use tiny_http::{Method, Request, Response, Server};
-use crate::{file_operations::{load_from_file, read_file}, tf::search_term, types::{FolderTokens, PageInformationMap, Website}};
+use crate::{file_operations::{load_from_file, read_file}, page_information::Website, tf::search_term, types::{FolderTokens, PageInformationMap}};
 
 fn serve_public_file(file_name:&str, content_type: &str, request: Request) -> (){
     let file = format!("./frontend/{}", file_name);

@@ -3,7 +3,8 @@ use std::{collections::HashMap, process::exit};
 use std::error::Error;
 use regex::Regex;
 use walkdir::WalkDir;
-use crate::types::{PageInformationMap, Website};
+use crate::page_information::Website;
+use crate::types::PageInformationMap;
 use rayon::prelude::*;
 use crate::{file_operations::read_file, types::{FolderTokens, TokenizedDocument}};
 

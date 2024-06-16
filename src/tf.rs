@@ -1,5 +1,5 @@
 use std::{collections::HashMap, error::Error};
-use crate::types::{FolderTokens, PageInformationMap, TokenizedDocument, Website};
+use crate::{page_information::Website, types::{FolderTokens, PageInformationMap, TokenizedDocument}};
 
 fn count_words(document: &TokenizedDocument) -> usize{
     let mut counter:usize = 0; 
